@@ -58,9 +58,14 @@ class Fan:
         self.mcu_fan = ppins.setup_pin("pwm", config.get("pin"))
         self.mcu_fan.setup_max_duration(0.0)
         self.mcu_fan.setup_cycle_time(cycle_time, hardware_pwm)
-        shutdown_power = max(0.0, min(self.max_power, shutdown_speed))
-        self.mcu_fan.setup_start_value(0.0, shutdown_power)
 
+        # shutdown value must be 0.0 or 1.0 on soft pwm
+        if hardware_pwm:
+            shutdown_power = max(0.0, min(self.max_power, shutdown_speed))
+        else:
+            shutdown_power = max(0.0, shutdown_speed)
+
+        self.mcu_fan.setup_start_value(0.0, shutdown_power)
         self.enable_pin = None
         enable_pin = config.get("enable_pin", None)
         if enable_pin is not None:
